@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <script>
+        // Function to fetch users from the API and display them
+        async function fetchUsers() {
+            const response = await fetch('/users');
+            const users = await response.json();
+            const userTable = document.getElementById('userTable');
+            userTable.innerHTML = ''; // Clear the table first
+            users.forEach(user => {
+                userTable.innerHTML += `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>
+                            <button onclick="editUser('${user._id}')">Edit</button>
+                            <button onclick="deleteUser('${user._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Function to create a user
+        async function createUser() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+
+            const response = await fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email }),
+            });
+
+            if (response.ok) {
+                alert('User created successfully!');
+                fetchUsers(); // Refresh the list of users
+            } else {
+                alert('Failed to create user!');
+            }
+        }
+
+        // Function to update a user
+        async function updateUser(userId) {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+
+            const response = await fetch(`/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email }),
+            });
+
+            if (response.ok) {
+                alert('User updated successfully!');
+                fetchUsers(); // Refresh the list of users
+            } else {
+                alert('Failed to update user!');
+            }
+        }
+
+        // Function to delete a user
+        async function deleteUser(userId) {
+            const response = await fetch(`/users/${userId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('User deleted successfully!');
+                fetchUsers(); // Refresh the list of users
+            } else {
+                alert('Failed to delete user!');
+            }
+        }
+
+        // Function to populate the form with user data for editing
+        function editUser(userId) {
+            const row = document.querySelector(`tr[data-id="${userId}"]`);
+            const name = row.querySelector('.name').innerText;
+            const email = row.querySelector('.email').innerText;
+
+            document.getElementById('name').value = name;
+            document.getElementById('email').value = email;
+            document.getElementById('createBtn').style.display = 'none'; // Hide Create button
+            document.getElementById('updateBtn').style.display = 'inline'; // Show Update button
+            document.getElementById('updateBtn').onclick = () => updateUser(userId);
+        }
+
+        window.onload = fetchUsers; // Fetch users when the page loads
+    </script>
+</head>
+<body>
+    <h1>User Management</h1>
+
+    <h2>Create or Update User</h2>
+    <form onsubmit="event.preventDefault(); createUser();">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <button id="createBtn" onclick="createUser()">Create User</button>
+        <button id="updateBtn" style="display:none;">Update User</button>
+    </form>
+
+    <h2>Users List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userTable">
+            <!-- Users will be listed here -->
+        </tbody>
+    </table>
+</body>
+</html>
