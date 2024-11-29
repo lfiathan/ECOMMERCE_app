@@ -1,0 +1,11 @@
+
+# Ignore environment files
+.env
+
+# Ignore dependencies
+node_modules/
+vendor/
+
+# Ignore build and system files
+build/
+.DS_Store
